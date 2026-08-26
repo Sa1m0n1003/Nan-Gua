@@ -1,0 +1,40 @@
+{
+  "name": "poi-plugin-nangua-liuchuan",
+  "version": "1.1.2",
+  "description": "南瓜留船：查询已有舰娘信息，按「运」值计算额外捞船，支持收藏置顶与新窗口打开",
+  "main": "index.es",
+  "license": "MIT",
+  "author": {
+    "name": "Sa1m0n1003",
+    "links": "https://github.com/Sa1m0n1003"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sa1m0n1003/Nan-Gua.git"
+  },
+  "homepage": "https://github.com/Sa1m0n1003/Nan-Gua",
+  "bugs": {
+    "url": "https://github.com/Sa1m0n1003/Nan-Gua/issues"
+  },
+  "files": [
+    "index.es",
+    "README.md"
+  ],
+  "keywords": [
+    "poi",
+    "poi-plugin",
+    "kancolle",
+    "ship",
+    "luck"
+  ],
+  "peerDependencies": {
+    "react": ">=15.0.0",
+    "prop-types": ">=15.0.0"
+  },
+  "poiPlugin": {
+    "title": "南瓜留船",
+    "description": "根据舰娘「运」值计算额外捞船（默认目标运 51），支持收藏置顶、新窗口打开",
+    "icon": "fa/star",
+    "priority": 100
+  }
+}
