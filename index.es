@@ -269,26 +269,40 @@ class PumpkinKeepShip extends React.Component {
       return
     }
 
-    // 舰线分组：同一艘舰的改造链（api_aftershipid 一路改到最终形态）视为同一“舰线”。
-    // 「已捞」按舰线统计，这样長波/長波改/長波改二 等不同改造形态也能合并计算。
+    // 舰线分组：同一艘舰的改造链视为同一“舰线”。
+    // 注意：分叉改造（如 夕张改二 → 夕张改二特/夕张改二丁）在游戏数据里以「环」编码
+    // （622→623→624→622，最后一个形态指回起点），不能“一路追到终点”——那样会在环上
+    // 断开、把一艘舰拆成多条舰线（夕张家族会被拆成 4 条）。改用并查集合并所有
+    // api_aftershipid 边，环自然收敛为同一个集合，一舰一族。
     const lineKey = {}
+    const parent = {}
+    const find = x => {
+      while (parent[x] !== x) {
+        parent[x] = parent[parent[x]]
+        x = parent[x]
+      }
+      return x
+    }
+    const union = (a, b) => {
+      const ra = find(String(a))
+      const rb = find(String(b))
+      if (ra !== rb) parent[ra] = rb
+    }
     const masterIds = Object.keys(masterShips)
     for (let i = 0; i < masterIds.length; i++) {
-      const id = masterIds[i]
-      let cur = id
-      const seen = {}
-      let guard = 0
-      while (guard++ < 50) {
-        const m = masterShips[cur]
-        if (!m) break
-        const next = m.api_aftershipid
-        if (next === undefined || next === null || next === 0 || next === '0' || next === '') break
-        const nextStr = String(next)
-        if (seen[nextStr]) break
-        seen[nextStr] = true
-        cur = nextStr
-      }
-      lineKey[id] = cur
+      parent[masterIds[i]] = masterIds[i]
+    }
+    for (let i = 0; i < masterIds.length; i++) {
+      const m = masterShips[masterIds[i]]
+      if (!m) continue
+      const next = m.api_aftershipid
+      if (next === undefined || next === null || next === 0 || next === '0' || next === '') continue
+      const nextStr = String(next)
+      if (!parent[nextStr]) continue // 指向不存在的舰（数据异常）则忽略
+      union(masterIds[i], nextStr)
+    }
+    for (let i = 0; i < masterIds.length; i++) {
+      lineKey[masterIds[i]] = find(masterIds[i])
     }
 
     // 轻量签名：仅当相关数据真正变化时才重建列表，避免无意义重渲染
